@@ -6,8 +6,8 @@ const renderer = new T.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=T.PCFSoftShadowMap;
-scene.add(new T.HemisphereLight(0xffe4c7,0xa2abc2,1.45));
-const fill=new T.DirectionalLight(0xffdfbe,1.9);
+scene.add(new T.HemisphereLight(0xdde6ff,0x885744,1.12));
+const fill=new T.DirectionalLight(0xffddb3,1.45);
 fill.position.set(-4,8,5);scene.add(fill);
 function part(geom,color,x,y,z,parent=scene){
  const obj=new T.Mesh(geom,new T.MeshStandardMaterial({color,roughness:.82}));
@@ -38,14 +38,42 @@ box(0,2.14,-.99,5.8,.09,.38,wood);
 for(let i=0;i<7;i++){const x=-2.65+i*.3;cyl(x,2.33,-.96,.10,.12,.28,[cream,jade,0xb24b37][i%3]);cyl(x,2.49,-.96,.105,.105,.04,iron)}
 const shutter=group(0,3.38,-.78);
 for(let i=0;i<15;i++)box(0,-.077-i*.15,0,5.95,.145,.095,0x637778,shutter);
-for(let i=0;i<13;i++){const x=-3.24+i*.54,c=i%2?0xf0c387:0xaf5038;
- const aw=box(x,3.71,-.85,.54,.11,1.57,c);aw.rotation.x=.11;
- box(x,3.53,-.07,.535,.25,.075,c)}
-sign('夜 市 小 吃','#214f49','#ffe7a8',0,3.91,-.77,2.9,.54);
-for(const x of [-3.33,3.33]){
- box(x,3.07,-.16,.025,.63,.025,iron);cyl(x,2.76,-.16,.23,.22,.43,0xd36346);
- for(const y of [2.52,2.66,2.85,3.0])cyl(x,y,-.16,.217,.217,.032,wood);
- cyl(x,2.45,-.16,.032,.032,.16,brass)}
+// Sewn canvas follows a curved frame. The scallops share the roof's stripe spacing.
+function oval(x,y,z,w,h,d,color,parent=scene){
+ const mesh=part(new T.SphereGeometry(1,16,12),color,x,y,z,parent);
+ mesh.scale.set(w,h,d);return mesh;
+}
+function rod(a,b,r,color,parent=scene){
+ const v=new T.Vector3(...a),u=new T.Vector3(...b),axis=u.clone().sub(v);
+ const mid=v.addScaledVector(axis,.5);
+ const obj=cyl(mid.x,mid.y,mid.z,r,r,axis.length(),color,parent);
+ obj.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),axis.normalize());return obj;
+}
+for(let i=0;i<15;i++){
+ const w=.47,x=-3.525+i*w,c=i%2?0xe4b778:0xa94735;
+ const vertices=[],indices=[];
+ for(let j=0;j<=10;j++){
+  const a=j*Math.PI/20, y=3.40+.52*Math.cos(a), z=-1.44+1.64*Math.sin(a);
+  vertices.push(x,y,z,x+w,y,z);if(j){const k=j*2;indices.push(k-2,k-1,k,k,k-1,k+1)}
+ }
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();
+ const stripe=part(g,c,0,0,0);stripe.material.side=T.DoubleSide;
+ const hem=new T.Shape();hem.moveTo(0,0);hem.lineTo(w,0);hem.lineTo(w,-.13);hem.quadraticCurveTo(w*.5,-.33,0,-.13);hem.closePath();
+ const fringe=part(new T.ShapeGeometry(hem),c,x,3.4,.204);fringe.material.side=T.DoubleSide;
+}
+box(0,4.10,-1.02,3.56,.65,.16,wood);
+sign('阿月麵攤','#234d48','#ffe9ab',0,4.10,-.927,3.48,.60);
+for(const x of [-3.32,3.32]){
+ rod([x,3.42,.18],[x,3.13,.18],.022,iron);
+ const paper=oval(x,2.84,.18,.285,.36,.265,0xe66c3c);
+ paper.material.emissive.setHex(0xae3117);paper.material.emissiveIntensity=.65;
+ for(let i=-3;i<=3;i++){
+  const y=i*.085,r=.287*Math.sqrt(1-(y/.36)**2);
+  cyl(x,2.84+y,.18,r,r,.015,0xb14828)
+ }
+ for(const y of [2.49,3.18])cyl(x,y,.18,.12,.12,.05,brass);
+ for(let i=-1;i<=1;i++)rod([x,2.46,.18],[x+.032*i,2.27,.18],.013,0xb94129);
+}
 // The three work surfaces sit at the same height so the lamp aim points double as test probes.
 const points=[-2,0,2].map(x=>new T.Vector3(x,1.33,.66));
 box(-2,1.30,.66,1.23,.09,.84,0xd09352);
@@ -55,12 +83,60 @@ cyl(.49,1.53,.26,.045,.045,.52,0xc1c9c2);box(.36,1.77,.26,.34,.07,.075,0xc1c9c2)
 box(2,1.30,.66,1.1,.12,.72,iron);box(2,1.37,.66,.93,.025,.57,0x9f5a36);
 for(let i=0;i<5;i++)cyl(1.73+i*.12,1.40,.64+(i%2)*.09,.067,.067,.028,brass);
 const vendor=group(-1.0,.68,-.53);
-box(0,.64,0,.53,.79,.36,0xe3ba83,vendor);box(0,.56,.2,.44,.61,.03,jade,vendor);
-const head=box(0,1.26,0,.39,.44,.37,0xc98b5d,vendor);
-box(0,1.5,0,.50,.10,.43,cream,vendor);
-for(const x of [-.105,.105])box(x,1.29,.195,.043,.042,.02,iron,vendor);
-const arm=group(.28,.94,.02,vendor);box(0,-.18,.04,.16,.39,.18,cream,arm);
+oval(0,.70,0,.29,.47,.19,0xc7ad89,vendor);
+box(0,.63,.145,.43,.57,.10,0x315e60,vendor);
+box(0,.49,.205,.25,.14,.022,0x537b70,vendor);
+for(const x of [-.15,.15])rod([x,1.07,.09],[x*.82,.82,.21],.031,0x315e60,vendor);
+oval(0,1.26,.015,.226,.26,.205,0xc58c65,vendor);
+oval(0,1.37,-.046,.235,.19,.19,0x414041,vendor);
+oval(0,1.48,0,.24,.115,.202,cream,vendor);
+box(0,1.43,.014,.45,.065,.34,0xb65340,vendor);
+for(const x of [-.09,.09]){
+ oval(x,1.29,.201,.021,.018,.016,iron,vendor);
+ rod([x-.045,1.326,.193],[x+.036,1.337,.195],.012,iron,vendor);
+}
+oval(0,1.246,.211,.041,.050,.04,0xd29a6c,vendor);
+rod([-.052,1.171,.182],[.036,1.166,.182],.009,wood,vendor);
+rod([-.23,.96,0],[-.31,.75,.05],.093,cream,vendor);
+oval(-.31,.69,.09,.068,.093,.075,0xc58c65,vendor);
+const arm=group(.25,.95,.02,vendor);rod([0,0,0],[.025,-.25,.055],.094,cream,arm);
+oval(.025,-.31,.065,.071,.10,.075,0xc58c65,arm);
 const cloth=box(.3,1.25,-.40,.26,.38,.035,0xf2e1ae);
+// Stacks of bowls, a bamboo steamer, a chopstick tin and a gas bottle describe the stall's trade.
+function rim(x,y,z,r,t,color){
+ const mesh=part(new T.TorusGeometry(r,t,8,28),color,x,y,z);mesh.rotation.x=Math.PI/2;return mesh;
+}
+for(let i=0;i<4;i++){
+ const y=1.31+i*.071;
+ cyl(-2.84,y,-.06,.22,.14,.14,0xe7d5af);rim(-2.84,y+.073,-.06,.216,.015,jade);
+}
+cyl(-2.38,1.45,-.08,.105,.095,.36,0x944632);
+for(let i=0;i<9;i++){
+ const a=i*2.4;rod([-2.38+.042*Math.cos(a),1.5,-.08+.042*Math.sin(a)],
+ [-2.38+.12*Math.cos(a),1.9+(i%3)*.035,-.08+.10*Math.sin(a)],.013,cream);
+}
+for(let i=0;i<2;i++){
+ const y=1.40+i*.18;cyl(2.92,y,-.02,.31,.31,.19,0xc89354);
+ rim(2.92,y+.087,-.02,.307,.019,0x85522e);
+}
+for(let i=-3;i<=3;i++){
+ const len=2*Math.sqrt(.28**2-(i*.074)**2);
+ box(2.92,1.69,-.02+i*.074,len,.025,.059,0xe4bb78);
+}
+for(const [x,label] of [[1.2,'陽春麵'],[1.8,'餛飩湯'],[2.4,'滷蛋']]){
+ box(x,2.72,-1.105,.50,.61,.06,cream);
+ sign(label,'#edd4a2','#703c2a',x,2.72,-1.069,.48,.51);
+}
+const tankX=-3.46;
+cyl(tankX,.48,.54,.203,.203,.65,0x72968b);
+oval(tankX,.80,.54,.203,.11,.203,0x72968b);
+cyl(tankX,.93,.54,.054,.054,.15,brass);
+rim(tankX,.97,.54,.104,.02,wood);
+for(const x of [-2.75,-1.88,1.85,2.72]){
+ const panel=box(x,.61,1.358,.72,.77,.045,0x275951);
+ box(x,.61,1.39,.61,.64,.025,0x396d63);
+ for(const dx of [-.25,.25])for(const dy of [-.26,.26])oval(x+dx,.61+dy,1.411,.017,.017,.009,brass);
+}
 const menu=box(.30,2.14,.63,.69,.55,.09,wood);
 sign('今日麵','#5a3329','#ffe5a2',.30,2.14,.682,.66,.51);
 for(const x of [.04,.56])box(x,2.92,.63,.018,1.02,.018,iron);
