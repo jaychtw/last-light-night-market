@@ -122,7 +122,7 @@ const orbit=createDioramaOrbit(camera,canvas,{target:focus,minDistance:6,maxDist
  const rect=canvas.getBoundingClientRect();ray.far=Infinity;ray.setFromCamera(new T.Vector2(2*(e.clientX-rect.left)/rect.width-1,1-2*(e.clientY-rect.top)/rect.height),camera);
  const hit=ray.intersectObjects(lamps.flatMap(l=>[l.shade,l.bulb]))[0];if(hit)turn(lamps.findIndex(l=>l.pivot===hit.object.parent));
 }});
-function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;camera.aspect=w/h;camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.max(.31,.44/camera.aspect)));camera.updateProjectionMatrix();renderer.setSize(w,h,false);draw()}
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;camera.aspect=w/h;camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.max(.355,.44/camera.aspect)));camera.updateProjectionMatrix();renderer.setSize(w,h,false);draw()}
 $('wide').onclick=()=>turn(0);$('spot').onclick=()=>turn(1);$('reset').onclick=()=>orbit.reset();
 $('lang').onclick=()=>{zh=!zh;ui()};$('again').onclick=()=>{setState(0,0);orbit.reset();$('wide').focus()};
 function setState(w,s){wide=w;spot=s;frozen=null;aim();closing=lit.every(Boolean)?performance.now()/1000:null;ui();draw()}
