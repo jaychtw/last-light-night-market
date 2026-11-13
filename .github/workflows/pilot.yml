@@ -1,0 +1,21 @@
+name: Diorama pilot checks
+on: [pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --no-save playwright-core@1.56.1
+      - run: python3 -m http.server 4180 > /tmp/stall-server.log 2>&1 &
+      - run: node qa/play.mjs && node qa/shoot.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+          QA_DIR: captures
+          SHOTS: '-1:blocked,1.5:cloth,3:closed'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: last-light-frames
+          path: captures
